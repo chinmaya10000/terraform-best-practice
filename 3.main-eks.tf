@@ -3,18 +3,17 @@ provider "aws" {
 }
 
 provider "helm" {
-  kubernetes = {
-    host                   = module.eks.cluster_endpoint
+  kubernetes {
+    host = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
-    exec = {
+    exec {
       api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+      command = "aws"
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
     }
   }
 }
-
 
 # VPC for Cluster
 data "aws_availability_zones" "azs" {}
@@ -75,7 +74,7 @@ module "eks" {
 
   eks_managed_node_groups = {
     initial = {
-        instance_type = ["t2.medium"]
+        instance_types = ["t2.medium"]
         min_size = 2
         max_size = 4
         desired_size = 2
@@ -83,32 +82,4 @@ module "eks" {
   }
 
   tags = var.tags
-}
-
-module "eks_blueprints_addons" {
-  source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.0"
-
-  cluster_name      = module.eks.cluster_name
-  cluster_endpoint  = module.eks.cluster_endpoint
-  cluster_version   = module.eks.cluster_version
-  oidc_provider_arn = module.eks.oidc_provider_arn
-
-  enable_metrics_server = true
-#   cluster_autoscaler = {
-#     set = [
-#       {
-#         name = "extraArgs.scale-down-unneeded-time"
-#         value = "1m"
-#       },
-#       {
-#         name = "extraArgs.skip-nodes-with-local-storage"
-#         value = false
-#       },
-#       {
-#         name = "extraArgs.skip-nodes-with-system-pods"
-#         value = false
-#       }
-#     ]
-#   }
 }
