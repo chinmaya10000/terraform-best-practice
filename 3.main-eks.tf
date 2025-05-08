@@ -70,20 +70,20 @@ module "eks-blueprints-addons" {
   oidc_provider_arn = module.eks.oidc_provider_arn
 
   enable_metrics_server = true
-  cluster_autoscaler = {
-    set = [
-      {
-        name = "extraArgs.scale-down-unneeded-time"
-        value = "1m"
-      },
-      {
-        name = "extraArgs.skip-nodes-with-local-storage"
-        value = false
-      },
-      {
-        name = "extraArgs.skip-nodes-with-system-pods"
-        value = false
-      }
-    ]
-  }
+#   cluster_autoscaler = {
+#     set = [
+#       {
+#         name = "extraArgs.scale-down-unneeded-time"
+#         value = "1m"
+#       },
+#       {
+#         name = "extraArgs.skip-nodes-with-local-storage"
+#         value = false
+#       },
+#       {
+#         name = "extraArgs.skip-nodes-with-system-pods"
+#         value = false
+#       }
+#     ]
+#   }
 }
