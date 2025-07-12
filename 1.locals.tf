@@ -1,8 +1,9 @@
 locals {
-  aws_region = "us-east-2"
-  vpc_cidr   = "10.0.0.0/16"
-  env        = "dev"
-  eks_name   = "myapp-eks"
+  aws_region  = "us-east-2"
+  vpc_cidr    = "10.0.0.0/16"
+  env         = "dev"
+  eks_name    = "myapp-eks"
+  eks_version = "1.33"
 
   azs            = ["us-east-2a", "us-east-2b", "us-east-2c"]
   public_subnets = ["10.0.0.0/19", "10.0.32.0/19"]
