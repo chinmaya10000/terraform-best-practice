@@ -2,7 +2,7 @@
 resource "aws_vpc" "main" {
   cidr_block = local.vpc_cidr
 
-  enable_dns_support = true
+  enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
@@ -23,14 +23,14 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_subnet" "public" {
   count = length(local.public_subnets)
 
-  vpc_id = aws_vpc.main.id
-  cidr_block = local.public_subnets[count.index]
-  availability_zone = local.azs[count.index]
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = local.public_subnets[count.index]
+  availability_zone       = local.azs[count.index]
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${local.env}-public-${local.azs[count.index]}"
-    "kubernetes.io/role/elb" = "1"
+    Name                                                   = "${local.env}-public-${local.azs[count.index]}"
+    "kubernetes.io/role/elb"                               = "1"
     "kubernetes.io/cluster/${local.env}-${local.eks_name}" = "owned"
   }
 }
@@ -53,7 +53,7 @@ resource "aws_route_table" "public" {
 resource "aws_route_table_association" "public" {
   count = length(local.public_subnets)
 
-  subnet_id = aws_subnet.public[count.index].id
+  subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
@@ -61,13 +61,13 @@ resource "aws_route_table_association" "public" {
 resource "aws_subnet" "private" {
   for_each = local.private_subnets
 
-  vpc_id = aws_vpc.main.id
-  cidr_block = each.value.cidr
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = each.value.cidr
   availability_zone = each.value.az
 
   tags = {
-    Name = "${local.env}-private-${each.value.az}"
-    "kubernetes.io/role/internal-elb" = "1"
+    Name                                                   = "${local.env}-private-${each.value.az}"
+    "kubernetes.io/role/internal-elb"                      = "1"
     "kubernetes.io/cluster/${local.env}-${local.eks_name}" = "owned"
   }
 }
@@ -84,13 +84,13 @@ resource "aws_eip" "nat" {
 # NAT Gateway for Private Subnets
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id = aws_subnet.public[0].id
+  subnet_id     = aws_subnet.public[0].id
 
   tags = {
     Name = "${local.env}-nat-gateway"
   }
 
-  depends_on = [ aws_internet_gateway.igw ]
+  depends_on = [aws_internet_gateway.igw]
 }
 
 # Route Table for Private Subnets
@@ -98,7 +98,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat.id
   }
 
@@ -111,6 +111,6 @@ resource "aws_route_table" "private" {
 resource "aws_route_table_association" "private" {
   for_each = local.private_subnets
 
-  subnet_id = aws_subnet.private[each.key].id
+  subnet_id      = aws_subnet.private[each.key].id
   route_table_id = aws_route_table.private.id
 }
