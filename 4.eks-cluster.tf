@@ -30,11 +30,11 @@ resource "aws_eks_cluster" "eks" {
   role_arn = aws_iam_role.eks.arn
 
   vpc_config {
-    endpoint_private_access = false 
+    endpoint_private_access = false
     endpoint_public_access  = true
 
     subnet_ids = [
-        for subnet in aws_subnet.private : subnet.id
+      for subnet in aws_subnet.private : subnet.id
     ]
   }
 
@@ -43,7 +43,7 @@ resource "aws_eks_cluster" "eks" {
     bootstrap_cluster_creator_admin_permissions = true
   }
 
-  depends_on = [ aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy ]
+  depends_on = [aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy]
 }
 
 # EKS Node Group IAM Role
@@ -79,10 +79,10 @@ resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_on
 
 # EKS Node Group
 resource "aws_eks_node_group" "general" {
-  cluster_name = aws_eks_cluster.eks.name
-  version = local.eks_version
+  cluster_name    = aws_eks_cluster.eks.name
+  version         = local.eks_version
   node_group_name = "general"
-  node_role_arn = aws_iam_role.nodes.arn
+  node_role_arn   = aws_iam_role.nodes.arn
 
   subnet_ids = [
     for subnet in aws_subnet.private : subnet.id
