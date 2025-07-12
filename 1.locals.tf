@@ -5,7 +5,7 @@ locals {
   eks_name = "myapp-eks"
 
   azs = ["us-east-2a", "us-east-2b", "us-east-2c"]
-  public_subnets = ["10.0.64.0/19", "10.0.96.0/19"]
+  public_subnets = ["10.0.0.0/19", "10.0.32.0/19"]
 
   private_subnets = {
     public_1 = {
