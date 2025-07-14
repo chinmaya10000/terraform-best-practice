@@ -18,9 +18,13 @@ resource "aws_iam_role" "eks" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
+resource "aws_iam_role_policy_attachment" "eks_cluster_policies" {
   role       = aws_iam_role.eks.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  policy_arn = each.value
+  for_each = toset([
+    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  ])
 }
 
 # EKS Cluster 
@@ -43,11 +47,11 @@ resource "aws_eks_cluster" "eks" {
     bootstrap_cluster_creator_admin_permissions = true
   }
 
-  depends_on = [aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy]
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster_policies]
 }
 
 # EKS Node Group IAM Role
-resource "aws_iam_role" "nodes" {
+resource "aws_iam_role" "eks_node" {
   name = "${local.env}-${local.eks_name}-node-group-role"
 
   assume_role_policy = jsonencode({
@@ -62,19 +66,14 @@ resource "aws_iam_role" "nodes" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
-  role       = aws_iam_role.nodes.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "amazon_eks_cni_policy" {
-  role       = aws_iam_role.nodes.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-}
-
-resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_only" {
-  role       = aws_iam_role.nodes.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+resource "aws_iam_role_policy_attachment" "eks_node_attachments" {
+  for_each = toset([
+    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  ])
+  role       = aws_iam_role.eks_node.name
+  policy_arn = each.value
 }
 
 # EKS Node Group
@@ -82,7 +81,7 @@ resource "aws_eks_node_group" "general" {
   cluster_name    = aws_eks_cluster.eks.name
   version         = local.eks_version
   node_group_name = "general"
-  node_role_arn   = aws_iam_role.nodes.arn
+  node_role_arn   = aws_iam_role.eks_node.arn
 
   subnet_ids = [
     for subnet in aws_subnet.private : subnet.id

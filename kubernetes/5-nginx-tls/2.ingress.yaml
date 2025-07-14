@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp
+  namespace: 9-example
+  annotations:
+    cert-manager.io/cluster-issuer: "http-01-production"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: external-nginx
+  tls:
+    - hosts:
+        - myapp.example.com
+      secretName: myapp-tls
+  rules:
+    - host: myapp.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: myapp
+                port:
+                  number: 8080
+
+
+
+
+# kubectl get certificate -n 3-example
+# output: ready should be true, if false then:
+# kubectl desribe certificate -n 3-example
+# kubectl describe CertificateRequest -n 3-example
+# kubectl describe order -n 3-example
+# kubectl describe challenge -n 3-example
