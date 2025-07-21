@@ -22,8 +22,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policies" {
   role       = aws_iam_role.eks.name
   policy_arn = each.value
   for_each = toset([
-    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   ])
 }
 
@@ -88,7 +87,7 @@ resource "aws_eks_node_group" "general" {
   ]
 
   capacity_type  = "ON_DEMAND"
-  instance_types = ["t2.medium"]
+  instance_types = ["t3.medium"]
 
   scaling_config {
     desired_size = 2
@@ -104,11 +103,7 @@ resource "aws_eks_node_group" "general" {
     role = "general"
   }
 
-  depends_on = [
-    aws_iam_role_policy_attachment.amazon_eks_worker_node_policy,
-    aws_iam_role_policy_attachment.amazon_eks_cni_policy,
-    aws_iam_role_policy_attachment.amazon_ec2_container_registry_read_only
-  ]
+  depends_on = [aws_iam_role_policy_attachment.eks_node_attachments]
 
   # Allow external changes without Terraform plan difference
   lifecycle {

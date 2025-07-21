@@ -9,11 +9,11 @@ locals {
   public_subnets = ["10.0.0.0/19", "10.0.32.0/19"]
 
   private_subnets = {
-    public_1 = {
+    private_1 = {
       cidr = cidrsubnet(local.vpc_cidr, 3, 2)
       az   = local.azs[0]
     }
-    public_2 = {
+    private_2 = {
       cidr = cidrsubnet(local.vpc_cidr, 3, 3)
       az   = local.azs[1]
     }
